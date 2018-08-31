@@ -28,7 +28,6 @@ setup(
     tests_require=[
         'pytest'
     ],
-    test_suite='test_ponyapi',
     classifiers=[
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
