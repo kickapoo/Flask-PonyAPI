@@ -33,15 +33,45 @@ def basic_app():
     db.generate_mapping(create_tables=True)
 
     with db_session:
-        p1 = Person(name='John',  age=20)
-        p2 = Person(name="fda", age=123)
-        p3 = PersonDefault(name="j2", age=123)
+        p1 = Person(name="Doctor Aphra",  age=20)
+        p2 = Person(name="Faro Argyus", age=21)
+        p3 = PersonDefault(name="Shara Bey", age=34)
 
-    # List of Entities
-    # entities = [v for k, v in db.entities.items()]
-    # or
-    entities = [PersonDefault, Person]
-    api = PonyAPI(app, entities)
+    api = PonyAPI(app, db)
+
+    yield app.test_client()
+
+    os.remove("tests/test-database.sqlite")
+
+
+@pytest.fixture
+def app_with_all_features:
+    from flask import Flask
+    from flask_ponyapi import PonyAPI
+
+    from pony.orm import db_session
+    from pony.orm import Database, Required, Optional
+
+    app = Flask(__name__)
+    db = Database()
+
+    class User(db.Entity):
+        username = Required(str)
+        points = Optional(int)
+        secret = Optional(str)
+
+        class Meta:
+            route_base = 'users'
+            route_prefix = '/api'
+            exclude = ['secret']
+
+    db.bind(provider='sqlite', filename='test-database.sqlite', create_db=True)
+    db.generate_mapping(create_tables=True)
+
+    with db_session:
+        u1 = User(name="Douglas Quaid",  age=32, secret='Hauser')
+
+    api = PonyAPI(app, db)
 
     yield app.test_client()
 

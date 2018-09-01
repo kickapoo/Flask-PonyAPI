@@ -6,10 +6,10 @@
     :copyright: (c) 2018 by Stavros Anastasiadis.
     :license: BSD, see LICENSE for more details.
 """
-from pony.orm.core import Entity
+from pony.orm import Database
 
 from .manager import RestEntity
-from .exceptions import EntitiesNotInAList, NotPonyEntitySubClass
+from .exceptions import NotPonyDatabase
 
 __version__ = '0.0.3'
 
@@ -19,10 +19,10 @@ class PonyAPI():
     """API Constructor for Database Entities
     """
 
-    def __init__(self, app, entities):
+    def __init__(self, app, db, auth=False):
 
-        if not isinstance(entities, list):
-            raise EntitiesNotInAList
+        if not isinstance(db, Database):
+            raise NotPonyDatabase
 
-        for entity in entities:
+        for k, entity in db.entities.items():
             RestEntity(app, entity)

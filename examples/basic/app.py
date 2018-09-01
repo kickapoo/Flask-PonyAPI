@@ -16,11 +16,10 @@ class Person(db.Entity):
 
 api = PonyAPI(app, db)
 
-
 if __name__ == '__main__':
     db.bind(provider='sqlite', filename='database.sqlite', create_db=True)
     db.generate_mapping(create_tables=True)
     with db_session:
-        p1 = Person(name='John',  age=20)
-        p2 = Person(name="fda", age=123)
+        p1 = Person(name='Almec',  age=99)
+        p2 = Person(name="Amee", age=100)
     app.run(debug=True)

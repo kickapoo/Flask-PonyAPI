@@ -9,7 +9,7 @@ class Meta:
 
 class RestEntity(object):
     """Main REST constructorself.
-    
+
     :param app: Flask application object
 
     :param entity: Pony Entity object.
