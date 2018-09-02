@@ -11,8 +11,7 @@ from pony.orm import Database
 from .manager import RestEntity
 from .exceptions import NotPonyDatabase
 
-__version__ = '0.0.3'
-
+__version__ = '0.0.5'
 
 
 class PonyAPI():
@@ -20,6 +19,7 @@ class PonyAPI():
     """
 
     def __init__(self, app, db, auth=False):
+        # TODO: missing .init_app()
 
         if not isinstance(db, Database):
             raise NotPonyDatabase

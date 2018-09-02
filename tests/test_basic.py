@@ -17,6 +17,17 @@ def test_list_view(basic_app, url, len):
     assert r.status_code == 200
     assert rd['len'] == len
 
+@pytest.mark.parametrize("url, len",[
+    ('/persondefault?fields=name,age', 1),
+    ('/api/persons?fields=name,age', 2)
+])
+def test_list_view_with_fields(basic_app, url, len):
+    # Test List view
+    r = basic_app.get(url)
+    rd = _data(r.data)
+    assert r.status_code == 200
+    assert rd['len'] == len
+
 
 @pytest.mark.parametrize("url",[
     '/persondefault/1',

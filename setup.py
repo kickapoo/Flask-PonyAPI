@@ -4,12 +4,16 @@ Flask-PonyAPI
 
 API creation for Pony ORM Entities with no effort.
 """
+import re
 from setuptools import setup
 
+with open('flask_ponyapi/__init__.py', 'r') as f:
+    version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
+                        f.read(), re.MULTILINE).group(1)
 
 setup(
     name='Flask-PonyAPI',
-    version='0.0.3',
+    version=version,
     url='https://github.com/fuzzyelements/Flask-PonyAPI',
     license='BSD',
     author='Stavros Anastasiadis',

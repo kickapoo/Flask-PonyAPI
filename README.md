@@ -2,9 +2,9 @@
 
 API creation for Pony ORM Entities with no effort.
 
-**Version**: Beta 0.0.1
+**Version**: Beta 0.0.5
 
-**Note**: Works only for Python 3
+**Note**: Works only for `Python 3`
 
 # Quickstart
 
@@ -24,10 +24,13 @@ db = Database()
 class Person(db.Entity):
     name = Required(str)
     age = Optional(int)
+    secret = Optional(str)
 
     class Meta:
         route_base = 'persons'
         route_prefix = '/api'
+        exclude = ['secret']
+
 
 api = PonyAPI(app, db)
 
@@ -36,8 +39,8 @@ if __name__ == '__main__':
     db.bind(provider='sqlite', filename='database.sqlite', create_db=True)
     db.generate_mapping(create_tables=True)
     with db_session:
-        p1 = Person(name='John',  age=20)
-        p2 = Person(name="fda", age=123)
+        p1 = Person(name="Juan Rico",  age=20, secret="Johnnie")
+        p2 = Person(name="Charles Zim", age=23, secret="Charlie")
     app.run(debug=True)
 
 ```

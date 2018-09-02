@@ -1,6 +1,7 @@
 import re
 from flask import request, url_for
 from flask_ponyapi.responses import APIResponse
+from flask_ponyapi.exceptions import InvalidMetaOption
 from pony.orm import db_session, commit, ObjectNotFound
 
 
@@ -26,9 +27,24 @@ class RestEntity(object):
     def _setup_meta(self, entity):
         """Create a _meta object with entity meta information.
         """
-        self._meta = Meta() # Make an empty Class in order to use dot notation
-        if hasattr(self.entity, 'Meta'):
-            self._meta = entity.Meta
+        self._meta = getattr(self.entity, 'Meta', Meta)
+        # Setup / Validate options
+        self._meta.route_prefix = getattr(self._meta, 'route_prefix', None)
+        if self._meta.route_prefix:
+            if not isinstance(self._meta.route_prefix, str):
+                raise InvalidMetaOption
+
+        self._meta.route_base = getattr(self._meta, 'route_base', None)
+        if self._meta.route_base:
+            if not isinstance(self._meta.route_base, str):
+                raise InvalidMetaOption
+
+        self._meta.exclude = getattr(self._meta, 'exclude', None)
+        if self._meta.exclude:
+            if not isinstance(self._meta.exclude, list):
+                raise InvalidMetaOption
+
+        # Setup Entities related
         self._meta.attrs = self._entity_attrs(entity)
         self._meta.attrs_names = [e['attr'] for e in self._meta.attrs]
         self._meta.rqd_attrs = [
@@ -36,6 +52,7 @@ class RestEntity(object):
             if e['rqd'] and not e['pk']
         ]
         self._meta._pk = self.entity._pk_.name
+        # Setup routes
         self._meta.base_rule = self._build_rule()
         return
 
@@ -43,6 +60,9 @@ class RestEntity(object):
         """Return entity fields details: name, is_required, is_pk, is_unique,
            type.
         """
+        exclude_fields = ''
+        if self._meta.exclude:
+            exclude_fields = self._meta.exclude
         return [
             {
                 'attr': e.name,
@@ -52,6 +72,7 @@ class RestEntity(object):
                 'type': e.py_type.__name__
             }
             for e in entity._attrs_
+            if e.name not in exclude_fields
         ]
 
     def _validate_request_querystrings(self):
@@ -60,7 +81,12 @@ class RestEntity(object):
         """
         fields = request.args.get('fields', None)
         if not fields:
-            fields = self._meta.attrs_names
+            fields = ','.join(self._meta.attrs_names)
+        if self._meta.exclude:
+            fields = ','.join([
+                f for f in fields.split(',')
+                if f not in self._meta.exclude
+            ])
         page = request.args.get('page', None)
         if not page:
             page = 1
@@ -107,9 +133,9 @@ class RestEntity(object):
 
         """
         rule_parts = []
-        if hasattr(self._meta, 'route_prefix'):
+        if self._meta.route_prefix:
             rule_parts.append(self._meta.route_prefix)
-        if hasattr(self._meta, 'route_base'):
+        if self._meta.route_base:
             rule_parts.append(self._meta.route_base)
         else:
             rule_parts.append(self.entity.__name__.lower())
